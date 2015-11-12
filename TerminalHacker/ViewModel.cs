@@ -142,7 +142,7 @@ namespace TerminalHacker
 
 			BestWord = wordList.OrderByDescending(_ => _.Effectiveness).First();
 			OtherWords.Clear();
-			foreach (var wrappedWord in wordList.Except(new []{ BestWord }))
+			foreach (var wrappedWord in wordList.OrderByDescending(_ => _.Effectiveness).Except(new []{ BestWord }))
 			{
 				OtherWords.Add(wrappedWord);
 			}

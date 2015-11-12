@@ -1,6 +1,8 @@
 ﻿using System.Windows.Input;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -25,13 +27,18 @@ namespace TerminalHacker
 		public void CreateView()
 		{
 			StackPanel.Children.Clear();
+			if (Word == null)
+			{
+				return;
+			}
 
 			foreach (var c in Word.Word)
 			{
 				var tb = new TextBlock
 				{
 					Text = c.ToString().ToUpper(),
-					Width = 24
+					Width = 24,
+					Foreground = new SolidColorBrush(Word.Failed ? Colors.Red : Colors.Black)
 				};
 				StackPanel.Children.Add(tb);
 			}

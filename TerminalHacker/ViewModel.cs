@@ -16,6 +16,7 @@ namespace TerminalHacker
 
 		public DelegateCommand<string> AddWordCommand { get; }
 		private Collection<string> WordCollection { get; } = new ObservableCollection<string>();
+		private IList<string> FailedWords { get; } = new List<string>();
 
 		public WrappedWord BestWord
 		{
@@ -53,12 +54,16 @@ namespace TerminalHacker
 
 		private void ExecuteWordDidNotWork(WrappedWord obj)
 		{
-			throw new NotImplementedException();
+			FailedWords.Add(obj.Word);
+			RecalculatePopularity();
 		}
 
 		private void ExecuteWordWorked(WrappedWord obj)
 		{
-			throw new NotImplementedException();
+			BestWord = null;
+			FailedWords.Clear();
+			OtherWords.Clear();
+			WordCollection.Clear();
 		}
 
 		public DelegateCommand<WrappedWord> WorkedCommand { get; set; }
@@ -102,12 +107,16 @@ namespace TerminalHacker
 		{
 			if (_wordLength == null) return;
 
-			IList<WrappedWord> wordList = WordCollection.Select(w => new WrappedWord(w)).ToList();
+			IList<WrappedWord> wordList = WordCollection.Select(w => new WrappedWord(w, FailedWords.Contains(w))).ToList();
+			//var activeWordList = wordList.Where(_ => !_.Failed).Select(_ => _.Word).ToList();
+			
 
 			for (int i = 0; i < _wordLength.Value; i++)
 			{
 				var index = i;
-				
+
+				var invalidChars = FailedWords.Select(w => w[index]).Distinct().ToArray();
+
 				var sum = WordCollection.Count;
 				var columnPopularities = WordCollection.Select(w => w[index]).GroupBy(c => c).ToDictionary(k => k.Key, v => v.Count() / (decimal)sum);
 
@@ -119,7 +128,15 @@ namespace TerminalHacker
 					}
 
 					var character = word.Word[i];
-					word.Effectiveness *= columnPopularities[character];
+					if (invalidChars.Contains(character))
+					{
+						word.Failed = true;
+						word.Effectiveness = 0;
+					}
+					else
+					{
+						word.Effectiveness *= columnPopularities[character];
+					}
 				}
 			}
 
@@ -141,10 +158,22 @@ namespace TerminalHacker
 		}
 	}
 
-	public class WrappedWord : IEquatable<WrappedWord>, INotifyPropertyChanged
+	public class WrappedWord : INotifyPropertyChanged
 	{
 		private decimal _effectiveness;
+		private bool _failed;
 		public string Word { get; }
+
+		public bool Failed
+		{
+			get { return _failed; }
+			set
+			{
+				if (value == _failed) return;
+				_failed = value;
+				OnPropertyChanged();
+			}
+		}
 
 		public decimal Effectiveness
 		{
@@ -157,26 +186,11 @@ namespace TerminalHacker
 			}
 		}
 
-		public WrappedWord(string word)
+		public WrappedWord(string word, bool failed)
 		{
 			Word = word;
+			Failed = failed;
 			Effectiveness = 0;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj)) return false;
-			return obj is WrappedWord && Equals((WrappedWord) obj);
-		}
-
-		public bool Equals(WrappedWord other)
-		{
-			return string.Equals(Word, other.Word);
-		}
-
-		public override int GetHashCode()
-		{
-			return Word?.GetHashCode() ?? 0;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

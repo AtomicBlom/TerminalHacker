@@ -5,15 +5,15 @@ namespace TerminalHacker
 {
 	class DelegateCommand : ICommand
 	{
-		private readonly Action<object> _executeMethod;
-		private readonly Predicate<object> _canExecuteMethod;
+		private readonly Action _executeMethod;
+		private readonly Func<Boolean> _canExecuteMethod;
 
-		public DelegateCommand(Action<object> executeMethod)
+		public DelegateCommand(Action executeMethod)
 		{
 			_executeMethod = executeMethod;
 		}
 
-		public DelegateCommand(Action<object> executeMethod, Predicate<object> canExecuteMethod)
+		public DelegateCommand(Action executeMethod, Func<Boolean> canExecuteMethod)
 		{
 			_executeMethod = executeMethod;
 			_canExecuteMethod = canExecuteMethod;
@@ -21,12 +21,12 @@ namespace TerminalHacker
 
 		public bool CanExecute(object parameter)
 		{
-			return _canExecuteMethod?.Invoke(parameter) ?? true;
+			return _canExecuteMethod?.Invoke() ?? true;
 		}
 
 		public void Execute(object parameter)
 		{
-			_executeMethod?.Invoke(parameter);
+			_executeMethod?.Invoke();
 		}
 
 		public event EventHandler CanExecuteChanged;

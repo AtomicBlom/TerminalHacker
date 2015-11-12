@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -11,9 +12,23 @@ namespace TerminalHacker
 	{
 		private string _wordToAdd;
 		private int? _wordLength;
+		private WrappedWord _bestWord;
 
 		public DelegateCommand<string> AddWordCommand { get; }
-		public Collection<WrappedWord> WordCollection { get; } = new ObservableCollection<WrappedWord>();
+		private Collection<string> WordCollection { get; } = new ObservableCollection<string>();
+
+		public WrappedWord BestWord
+		{
+			get { return _bestWord; }
+			set
+			{
+				if (Equals(value, _bestWord)) return;
+				_bestWord = value;
+				OnPropertyChanged();
+			}
+		}
+
+		public Collection<WrappedWord> OtherWords { get; } = new ObservableCollection<WrappedWord>();
 
 		public string WordToAdd
 		{
@@ -30,7 +45,23 @@ namespace TerminalHacker
 		public ViewModel()
 		{
 			AddWordCommand = new DelegateCommand<string>(ExecuteAddWord, CanExecuteAddWord);
+			WorkedCommand = new DelegateCommand<WrappedWord>(ExecuteWordWorked);
+			DidNotWorkCommand = new DelegateCommand<WrappedWord>(ExecuteWordDidNotWork);
 		}
+
+		public DelegateCommand<WrappedWord> DidNotWorkCommand { get; set; }
+
+		private void ExecuteWordDidNotWork(WrappedWord obj)
+		{
+			throw new NotImplementedException();
+		}
+
+		private void ExecuteWordWorked(WrappedWord obj)
+		{
+			throw new NotImplementedException();
+		}
+
+		public DelegateCommand<WrappedWord> WorkedCommand { get; set; }
 
 		private bool CanExecuteAddWord(string word)
 		{
@@ -50,33 +81,37 @@ namespace TerminalHacker
 				return true;
 			}
 
-			return _wordLength == word.Length && !WordCollection.Contains(new WrappedWord(word));
+			return _wordLength == word.Length && !WordCollection.Contains(word);
 		}
 
 		private void ExecuteAddWord(string word)
 		{
 			word = word.ToLower();
-			WordCollection.Add(new WrappedWord(word));
+			WordCollection.Add(word);
 			if (_wordLength == null)
 			{
 				_wordLength = word.Length;
 			}
-			WordToAdd = string.Empty;
+			
 
-			ReclaculatePopularity();
+			RecalculatePopularity();
+			WordToAdd = string.Empty;
 		}
 
-		private void ReclaculatePopularity()
+		private void RecalculatePopularity()
 		{
 			if (_wordLength == null) return;
+
+			IList<WrappedWord> wordList = WordCollection.Select(w => new WrappedWord(w)).ToList();
+
 			for (int i = 0; i < _wordLength.Value; i++)
 			{
 				var index = i;
 				
 				var sum = WordCollection.Count;
-				var columnPopularities = WordCollection.Select(w => w.Word[index]).GroupBy(c => c).ToDictionary(k => k.Key, v => v.Count() / (decimal)sum);
+				var columnPopularities = WordCollection.Select(w => w[index]).GroupBy(c => c).ToDictionary(k => k.Key, v => v.Count() / (decimal)sum);
 
-				foreach (var word in WordCollection)
+				foreach (var word in wordList)
 				{
 					if (i == 0)
 					{
@@ -87,6 +122,14 @@ namespace TerminalHacker
 					word.Effectiveness *= columnPopularities[character];
 				}
 			}
+
+			BestWord = wordList.OrderByDescending(_ => _.Effectiveness).First();
+			OtherWords.Clear();
+			foreach (var wrappedWord in wordList.Except(new []{ BestWord }))
+			{
+				OtherWords.Add(wrappedWord);
+			}
+			
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

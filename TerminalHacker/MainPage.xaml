@@ -18,7 +18,18 @@
         <Grid HorizontalAlignment="Left" Height="700" Margin="10,10,0,0" VerticalAlignment="Top" Width="1260">
             <TextBox x:Name="WordToAdd" HorizontalAlignment="Left" Margin="10,10,0,0" TextWrapping="Wrap" Text="{Binding WordToAdd, Mode=TwoWay}" VerticalAlignment="Top" Width="194" local:LinkToButton.Button="{Binding ElementName=AddWordButton}" />
             <Button x:Name="AddWordButton" Content="Button" HorizontalAlignment="Left" Margin="209,10,0,0" VerticalAlignment="Top" Command="{Binding AddWordCommand}" CommandParameter="{Binding Text, ElementName=WordToAdd}"/>
-            <ListView x:Name="listView" HorizontalAlignment="Left" Height="434" Margin="10,47,0,0" VerticalAlignment="Top" Width="565" ItemsSource="{Binding WordCollection}">
+            <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Padding="0,46,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <local:WordDisplay x:Name="BestWord" Word="{Binding BestWord, Converter={StaticResource DebugConverter}}" Margin="0,46,0,40" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                <Button Grid.Column="1" Content="Worked" Command="{Binding WorkedCommand}" />
+                <Button Grid.Column="2" Content="Did not Work" Command="{Binding DidNotWorkCommand}" />
+            </Grid>
+            
+            <ListView x:Name="listView" HorizontalAlignment="Left" Height="434" Margin="10,159,0,0" VerticalAlignment="Top" Width="565" ItemsSource="{Binding OtherWords}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <local:WordDisplay Word="{Binding}" />

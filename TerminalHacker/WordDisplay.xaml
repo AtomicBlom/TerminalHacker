@@ -13,8 +13,10 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
-        <StackPanel x:Name="StackPanel" Orientation="Horizontal" Grid.Column="1"/>
+        <StackPanel x:Name="StackPanel" Orientation="Horizontal" Grid.Column="1" />
         <TextBlock Text="{Binding Word.Effectiveness, ElementName=userControl, Mode=OneWay}" Grid.Column="0" />
     </Grid>
 </UserControl>

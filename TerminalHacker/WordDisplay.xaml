@@ -8,7 +8,9 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-
+    <UserControl.Resources>
+        <local:StringFormatConverter x:Key="StringFormatConverter" />
+    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="60"/>
@@ -17,6 +19,6 @@
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <StackPanel x:Name="StackPanel" Orientation="Horizontal" Grid.Column="1" />
-        <TextBlock Text="{Binding Word.Effectiveness, ElementName=userControl, Mode=OneWay}" Grid.Column="0" />
+        <TextBlock Text="{Binding Word.Effectiveness, ElementName=userControl, Mode=OneWay, Converter={StaticResource StringFormatConverter}, ConverterParameter='{}{0:P}'}" Grid.Column="0" />
     </Grid>
 </UserControl>
